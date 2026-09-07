@@ -1,0 +1,24 @@
+{
+    "name": "@icewhale/zimaos-schema",
+    "version": "1.0.0",
+    "description": "Static JSON Schema hosting for ZimaOS",
+    "files": [
+        "schema"
+    ],
+    "scripts": {
+        "generate:zimaapp": "node scripts/generate-zimaapp.mjs",
+        "build": "node scripts/build.mjs",
+        "check": "node scripts/build.mjs --check",
+        "prepack": "node scripts/build.mjs --check --quiet"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "engines": {
+        "node": ">=20.19.0"
+    },
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "oxfmt": "0.66.0"
+    }
+}

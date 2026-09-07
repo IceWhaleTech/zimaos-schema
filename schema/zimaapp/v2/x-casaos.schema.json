@@ -46,10 +46,7 @@
     },
     "id": {
       "description": "ID is the canonical, namespaced application identifier.",
-      "examples": [
-        "com.example.app",
-        "io.zimaos.media-server"
-      ],
+      "examples": ["com.example.app", "io.zimaos.media-server"],
       "pattern": "^[a-z0-9_-]+(?:\\.[a-z0-9_-]+)+$",
       "type": "string"
     },
@@ -95,10 +92,7 @@
     },
     "scheme": {
       "description": "Scheme selects the protocol used to open the application interface.",
-      "enum": [
-        "http",
-        "https"
-      ],
+      "enum": ["http", "https"],
       "type": "string"
     },
     "screenshot_link": {

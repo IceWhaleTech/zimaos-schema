@@ -1,3 +1,6 @@
 [submodule "reops/ZimaOS-AppManagement"]
 	path = reops/ZimaOS-AppManagement
 	url = https://github.com/IceWhaleTech/ZimaOS-AppManagement.git
+[submodule "reops/compose-go"]
+	path = reops/compose-go
+	url = https://github.com/compose-spec/compose-go.git

@@ -1,6 +1,6 @@
 # ZimaApp v2App schemas
 
-Go types and profile definitions in `reops/ZimaOS-AppManagement` are the source of truth for these generated JSON schemas. The GitHub workflow builds and runs the schema generator in that submodule, then syncs the artifacts into this directory.
+Go types and profile definitions in `reops/ZimaOS-AppManagement` are the source of truth for these generated JSON schemas. Run `npm run generate:zimaapp` from the repository root to regenerate, format with `oxfmt`, and sync the published artifacts.
 
 ## Choose a profile
 
@@ -8,13 +8,13 @@ Go types and profile definitions in `reops/ZimaOS-AppManagement` are the source 
 - `repository.schema.json` validates repository submissions. Top-level `x-casaos` and canonical `x-casaos.id` are required. `repo_id` and `version` remain optional.
 - `x-casaos.schema.json` validates the extension alone.
 
-The generated profiles extend the vendored upstream schema used by Docker Compose `v2.23.3`, which resolves to `compose-go v1.20.2`:
+The generated profiles extend the upstream schema used by Docker Compose `v2.23.3`, which resolves to `compose-go v1.20.2`:
 
 ```text
-../../compose-go/v1.20.2/schema/compose-spec.json
+../../compose-go/v1.20.2/compose-spec.json
 ```
 
-The upstream schema is committed at `schema/compose-go/v1.20.2/schema/compose-spec.json`, so schema consumers do not need network access. CI verifies that this copy still matches the immutable upstream tag. When the project's Docker Compose dependency changes, update the vendored file and relative reference to the schema version selected by that Docker Compose release.
+The upstream schema is copied from the fixed `reops/compose-go` submodule into `schema/compose-go/v1.20.2/compose-spec.json`, so published consumers do not need network access. When the project's Docker Compose dependency changes, update the submodule gitlink, published copy, and relative reference together.
 
 For VS Code with YAML Language Server, put this at the top of a repository Compose file:
 

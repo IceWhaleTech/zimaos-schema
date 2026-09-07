@@ -14,16 +14,12 @@
               "$ref": "x-casaos.schema.json"
             },
             {
-              "required": [
-                "id"
-              ]
+              "required": ["id"]
             }
           ]
         }
       },
-      "required": [
-        "x-casaos"
-      ],
+      "required": ["x-casaos"],
       "type": "object"
     }
   ],

@@ -1,12 +1,9 @@
 name: Generate ZimaApp schema
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: read
@@ -17,11 +14,51 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve source submodule commit
+        id: source
+        run: echo "commit=$(git rev-parse HEAD:reops/ZimaOS-AppManagement)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve Compose submodule commit
+        id: compose
+        run: echo "commit=$(git rev-parse HEAD:reops/compose-go)" >> "$GITHUB_OUTPUT"
+
+      - name: Require private submodule token
+        env:
+          SUBMODULES_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
+        run: test -n "$SUBMODULES_TOKEN"
 
       - name: Check out source submodule
+        uses: actions/checkout@v4
+        with:
+          repository: IceWhaleTech/ZimaOS-AppManagement
+          ref: ${{ steps.source.outputs.commit }}
+          path: reops/ZimaOS-AppManagement
+          persist-credentials: false
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN }}
+
+      - name: Verify source submodule
         run: |
-          git config --global url.https://github.com/.insteadOf git@github.com:
-          git submodule update --init --recursive reops/ZimaOS-AppManagement
+          expected_commit="$(git rev-parse HEAD:reops/ZimaOS-AppManagement)"
+          actual_commit="$(git -C reops/ZimaOS-AppManagement rev-parse HEAD)"
+          test "$actual_commit" = "$expected_commit"
+
+      - name: Check out Compose submodule
+        uses: actions/checkout@v4
+        with:
+          repository: compose-spec/compose-go
+          ref: ${{ steps.compose.outputs.commit }}
+          path: reops/compose-go
+          persist-credentials: false
+
+      - name: Verify Compose submodule
+        run: |
+          expected_commit="$(git rev-parse HEAD:reops/compose-go)"
+          actual_commit="$(git -C reops/compose-go rev-parse HEAD)"
+          test "$actual_commit" = "$expected_commit"
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -29,35 +66,24 @@ jobs:
           go-version-file: reops/ZimaOS-AppManagement/go.mod
           cache-dependency-path: reops/ZimaOS-AppManagement/go.sum
 
-      - name: Build schema generator
-        working-directory: reops/ZimaOS-AppManagement
-        run: go build -o "$RUNNER_TEMP/zimaapp-schema" ./cmd/zimaapp-schema
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-      - name: Generate schema
-        working-directory: reops/ZimaOS-AppManagement
-        run: "$RUNNER_TEMP/zimaapp-schema"
+      - name: Install formatter
+        run: npm ci
 
-      - name: Test schema generator
-        working-directory: reops/ZimaOS-AppManagement
-        run: go test ./cmd/zimaapp-schema ./internal/zimaappschema
+      - name: Generate and sync ZimaApp schemas
+        run: npm run generate:zimaapp
 
-      - name: Sync generated artifacts
-        run: |
-          mkdir -p schema/zimaapp/v2
-          rm -f schema/zimaapp/v2/*.schema.json
-          cp reops/ZimaOS-AppManagement/schema/zimaapp/v2/*.schema.json schema/zimaapp/v2/
-          jq '.allOf[0]["$ref"] = "../../compose-go/v1.20.2/schema/compose-spec.json"' \
-            schema/zimaapp/v2/zimaapp-v2app.schema.json > "$RUNNER_TEMP/zimaapp-v2app.schema.json"
-          mv "$RUNNER_TEMP/zimaapp-v2app.schema.json" schema/zimaapp/v2/zimaapp-v2app.schema.json
-
-      - name: Check vendored Compose schema
-        run: |
-          curl --fail --silent --show-error --location \
-            https://raw.githubusercontent.com/compose-spec/compose-go/v1.20.2/schema/compose-spec.json \
-            --output "$RUNNER_TEMP/compose-spec.json"
-          cmp "$RUNNER_TEMP/compose-spec.json" schema/compose-go/v1.20.2/schema/compose-spec.json
+      - name: Check schema formatting
+        run: npx --no-install oxfmt --check schema/compose-go/v1.20.2/compose-spec.json schema/zimaapp/v2/*.schema.json
 
       - name: Check generated artifacts
         run: |
+          compose_ref="$(jq -r '.allOf[0]["$ref"]' schema/zimaapp/v2/zimaapp-v2app.schema.json)"
+          test -f "schema/zimaapp/v2/$compose_ref"
           git diff --exit-code -- schema/compose-go/v1.20.2 schema/zimaapp/v2
           test -z "$(git status --porcelain --untracked-files=all -- schema/compose-go/v1.20.2 schema/zimaapp/v2)"
