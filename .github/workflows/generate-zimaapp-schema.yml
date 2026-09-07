@@ -1,0 +1,63 @@
+name: Generate ZimaApp schema
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check out source submodule
+        run: |
+          git config --global url.https://github.com/.insteadOf git@github.com:
+          git submodule update --init --recursive reops/ZimaOS-AppManagement
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: reops/ZimaOS-AppManagement/go.mod
+          cache-dependency-path: reops/ZimaOS-AppManagement/go.sum
+
+      - name: Build schema generator
+        working-directory: reops/ZimaOS-AppManagement
+        run: go build -o "$RUNNER_TEMP/zimaapp-schema" ./cmd/zimaapp-schema
+
+      - name: Generate schema
+        working-directory: reops/ZimaOS-AppManagement
+        run: "$RUNNER_TEMP/zimaapp-schema"
+
+      - name: Test schema generator
+        working-directory: reops/ZimaOS-AppManagement
+        run: go test ./cmd/zimaapp-schema ./internal/zimaappschema
+
+      - name: Sync generated artifacts
+        run: |
+          mkdir -p schema/zimaapp/v2
+          rm -f schema/zimaapp/v2/*.schema.json
+          cp reops/ZimaOS-AppManagement/schema/zimaapp/v2/*.schema.json schema/zimaapp/v2/
+          jq '.allOf[0]["$ref"] = "../../compose-go/v1.20.2/schema/compose-spec.json"' \
+            schema/zimaapp/v2/zimaapp-v2app.schema.json > "$RUNNER_TEMP/zimaapp-v2app.schema.json"
+          mv "$RUNNER_TEMP/zimaapp-v2app.schema.json" schema/zimaapp/v2/zimaapp-v2app.schema.json
+
+      - name: Check vendored Compose schema
+        run: |
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/compose-spec/compose-go/v1.20.2/schema/compose-spec.json \
+            --output "$RUNNER_TEMP/compose-spec.json"
+          cmp "$RUNNER_TEMP/compose-spec.json" schema/compose-go/v1.20.2/schema/compose-spec.json
+
+      - name: Check generated artifacts
+        run: |
+          git diff --exit-code -- schema/compose-go/v1.20.2 schema/zimaapp/v2
+          test -z "$(git status --porcelain --untracked-files=all -- schema/compose-go/v1.20.2 schema/zimaapp/v2)"

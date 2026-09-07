@@ -1,0 +1,162 @@
+{
+  "$comment": "Generated from pkg/zimaapp/compose/v2.Extension by go run ./cmd/zimaapp-schema; DO NOT EDIT.",
+  "$id": "x-casaos.schema.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "additionalProperties": true,
+  "properties": {
+    "architectures": {
+      "description": "Architectures lists supported CPU architectures.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author": {
+      "description": "Author identifies the manifest author.",
+      "type": "string"
+    },
+    "autostart": {
+      "description": "AutoStart records the legacy automatic-start preference.\n\nReserved: autostart is reserved; do not set it directly.",
+      "type": "boolean",
+      "x-zimaapp-status": "reserved",
+      "x-zimaapp-warning": "Reserved: autostart is reserved; do not set it directly."
+    },
+    "category": {
+      "description": "Category identifies the application category.",
+      "type": "string"
+    },
+    "description": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Description contains the localized long application description.",
+      "type": "object"
+    },
+    "developer": {
+      "description": "Developer identifies the application developer.",
+      "type": "string"
+    },
+    "hostname": {
+      "description": "Hostname overrides the host used to open the application interface.",
+      "type": "string"
+    },
+    "icon": {
+      "description": "Icon is the application icon URL or path.",
+      "type": "string"
+    },
+    "id": {
+      "description": "ID is the canonical, namespaced application identifier.",
+      "examples": [
+        "com.example.app",
+        "io.zimaos.media-server"
+      ],
+      "pattern": "^[a-z0-9_-]+(?:\\.[a-z0-9_-]+)+$",
+      "type": "string"
+    },
+    "image": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Image contains localized image display text.",
+      "type": "object"
+    },
+    "image_drift_check": {
+      "description": "ImageDriftCheck records the image drift checking preference.\n\nReserved: image_drift_check is reserved and managed by ZimaOS; do not set it directly.",
+      "type": "boolean",
+      "x-zimaapp-status": "reserved",
+      "x-zimaapp-warning": "Reserved: image_drift_check is reserved and managed by ZimaOS; do not set it directly."
+    },
+    "index": {
+      "description": "Index is the path opened within the application interface.",
+      "type": "string"
+    },
+    "is_uncontrolled": {
+      "deprecated": true,
+      "description": "IsUncontrolled is the legacy installation-control marker.\n\nDeprecated: remove is_uncontrolled directly; there is no replacement.",
+      "type": "boolean",
+      "x-zimaapp-status": "deprecated",
+      "x-zimaapp-warning": "Deprecated: remove is_uncontrolled directly; there is no replacement."
+    },
+    "main": {
+      "description": "Main identifies the primary Compose service.",
+      "type": "string"
+    },
+    "port_map": {
+      "description": "PortMap identifies the service port used by the application interface.",
+      "type": "string"
+    },
+    "release_note": {
+      "description": "ReleaseNote describes changes in this application release.",
+      "type": "string"
+    },
+    "repo_id": {
+      "description": "RepoID identifies the repository that supplied the application.",
+      "type": "string"
+    },
+    "scheme": {
+      "description": "Scheme selects the protocol used to open the application interface.",
+      "enum": [
+        "http",
+        "https"
+      ],
+      "type": "string"
+    },
+    "screenshot_link": {
+      "description": "ScreenshotLink lists application screenshot URLs or paths.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "store_app_id": {
+      "deprecated": true,
+      "description": "StoreAppID is the legacy application store identifier.\n\nDeprecated: migrate to id under the canonical naming rules, then remove store_app_id.",
+      "type": "string",
+      "x-zimaapp-replacement": "id",
+      "x-zimaapp-status": "deprecated",
+      "x-zimaapp-warning": "Deprecated: migrate to id under the canonical naming rules, then remove store_app_id."
+    },
+    "tagline": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Tagline contains the localized short application description.",
+      "type": "object"
+    },
+    "thumbnail": {
+      "description": "Thumbnail is the application thumbnail URL or path.",
+      "type": "string"
+    },
+    "tips": {
+      "additionalProperties": true,
+      "description": "Tips contains installation guidance shown to users.",
+      "properties": {
+        "before_install": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "BeforeInstall contains localized guidance displayed before installation.",
+          "type": "object"
+        },
+        "custom": {
+          "description": "Custom contains a non-localized custom installation note.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "title": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Title contains the localized application name.",
+      "type": "object"
+    },
+    "version": {
+      "description": "Version identifies the application release.",
+      "type": "string"
+    }
+  },
+  "title": "ZimaApp x-casaos extension",
+  "type": "object"
+}

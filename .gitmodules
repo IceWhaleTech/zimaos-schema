@@ -1,0 +1,3 @@
+[submodule "reops/ZimaOS-AppManagement"]
+	path = reops/ZimaOS-AppManagement
+	url = https://github.com/IceWhaleTech/ZimaOS-AppManagement.git
