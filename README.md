@@ -180,7 +180,8 @@ reops/compose-go/schema/compose-spec.json
 
 ## CI
 
-Workflow 位于 `.github/workflows/generate-zimaapp-schema.yml`，仅在推送 `vX.Y.Z` 格式的三段数字版本 tag 时执行，例如 `v1.0.0`、`v1.2.3`。普通分支 push、Pull Request 和带预发布后缀的 tag 不会触发 Schema 生成。
+- `.github/workflows/generate-zimaapp-schema.yml`：仅在推送 `vX.Y.Z` 格式的三段数字版本 tag 时执行，例如 `v1.0.0`、`v1.2.3`。普通分支 push、Pull Request 和带预发布后缀的 tag 不会触发 Schema 生成。
+- `.github/workflows/deploy-cloudflare-pages.yml`：推送到 `main` 时构建静态站点并通过 Wrangler 部署到 Cloudflare Pages。checkout 明确设置 `submodules: false`，因此不会读取私有子仓库。
 
 ## 静态站点
 
@@ -207,17 +208,24 @@ npm run check
 
 ### Cloudflare Pages
 
-在 Cloudflare Dashboard 中创建 Pages 项目并连接此 GitHub 仓库，使用以下构建配置：
+Cloudflare 的 Git 集成会在运行构建命令前自动初始化本仓库声明的 submodule，无法读取私有 `ZimaOS-AppManagement` 时会直接失败。本站改由 GitHub Actions 构建，并使用 Wrangler Direct Upload，Cloudflare Pages 不再 checkout 仓库。
+
+先在 Cloudflare Dashboard 中创建 Pages 项目，然后在 GitHub 仓库中配置以下 Actions Secrets：
 
 ```text
-Framework preset: None
-Build command: npm run build
-Build output directory: dist
-Root directory: /
-Node.js version: 20 或更高
+CLOUDFLARE_ACCOUNT_ID
+CLOUDFLARE_API_TOKEN
 ```
 
-静态站点构建不需要初始化私有 submodule，因为它直接发布当前仓库已经提交的 `schema/` 文件。Schema 生成和漂移校验仍由 GitHub Actions 负责。
+`CLOUDFLARE_API_TOKEN` 使用最小权限 `Account / Cloudflare Pages / Edit`。另添加 Actions Repository Variable：
+
+```text
+CLOUDFLARE_PAGES_PROJECT=<Pages 项目名称>
+```
+
+如果 Pages 项目已经连接 GitHub，在 Cloudflare Dashboard 的项目设置中关闭 production 和 preview 分支自动部署，避免 Cloudflare 自己再次 checkout 并初始化 submodule。之后推送到 `main`，或手动运行 `Deploy Cloudflare Pages` workflow。
+
+静态站点构建直接发布当前仓库已经提交的 `schema/` 文件，不需要安装 npm 依赖或初始化私有 submodule。Schema 生成和漂移校验仍由单独的 GitHub Actions workflow 负责。
 
 部署后，Schema URL 保持稳定，例如：
 
