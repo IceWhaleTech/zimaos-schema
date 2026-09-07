@@ -194,7 +194,7 @@ npm run build
 输出内容包括：
 
 - `dist/schema/`：只复制 JSON Schema 并完整保留原有路径，已有相对 `$ref` 无需改变
-- `dist/docs/`：由 `@adobe/jsonschema2md` 根据 ZimaApp Schema 自动生成的 Markdown 字段参考
+- `dist/docs/`：手写的应用部署/移植指南，以及由 `@adobe/jsonschema2md` 根据 ZimaApp Schema 自动生成的 Markdown 字段参考
 - `dist/llms.txt`：符合 llms.txt 约定的精简文档索引
 - `dist/llms-full.txt`：可直接载入上下文的完整 `x-casaos` 字段文档
 - `dist/index.html`：Schema Registry 首页

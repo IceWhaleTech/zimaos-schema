@@ -5,6 +5,7 @@ import process from "node:process";
 
 const root = process.cwd();
 const sourceDirectory = path.join(root, "schema");
+const documentationSourceDirectory = path.join(root, "docs");
 const outputDirectory = path.join(root, "dist");
 const checkOnly = process.argv.includes("--check");
 const quiet = process.argv.includes("--quiet");
@@ -44,6 +45,9 @@ await writeFile(path.join(outputDirectory, "404.html"), renderNotFound());
 const origin = (process.env.SCHEMA_SITE_ORIGIN ?? "https://schema.zimaos.com").replace(/\/$/, "");
 const documentationInput = path.join(outputDirectory, "docs", "schema");
 await mkdir(path.join(outputDirectory, "docs"), { recursive: true });
+await cp(documentationSourceDirectory, path.join(outputDirectory, "docs"), {
+  recursive: true,
+});
 await mkdir(documentationInput, { recursive: true });
 await cp(
   path.join(sourceDirectory, "zimaapp", "v2", "x-casaos.schema.json"),
@@ -139,6 +143,21 @@ function renderLlms(origin) {
 ## Documentation
 
 - [x-casaos field documentation](${origin}/docs/README.md): Markdown reference generated from the published extension schema.
+
+## Application Deployment
+
+- [Application deployment decisions](${origin}/docs/deployment/application-deployment.md): Evidence-driven rules for selecting images, architectures, persistence, networking, secrets, security, and hardware requirements.
+
+## Application Porting
+
+- [Application porting guide](${origin}/docs/porting/application-porting.md): End-to-end workflow for analyzing an upstream project, creating a ZimaOS package, validating generated output, and reporting remaining risks.
+
+## Instructions for AI Agents
+
+- Produce a deployable application package, not merely a syntactically valid Compose file.
+- Follow schemas, repository rules, upstream documentation, and image metadata in that order.
+- Cite evidence for material deployment decisions and report unknown values instead of guessing.
+- Do not claim successful ZimaOS deployment without installation and testing on a ZimaOS device.
 
 ## Schemas
 
