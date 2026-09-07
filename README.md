@@ -230,9 +230,9 @@ CLOUDFLARE_PAGES_PROJECT=<Pages 项目名称>
 部署后，Schema URL 保持稳定，例如：
 
 ```text
-https://<your-domain>/schema/zimaapp/v2/repository.schema.json
-https://<your-domain>/schema/zimaapp/v2/zimaapp-v2app.schema.json
-https://<your-domain>/schema/zimaapp/v2/x-casaos.schema.json
+https://schema.zimaos.com/schema/zimaapp/v2/repository.schema.json
+https://schema.zimaos.com/schema/zimaapp/v2/zimaapp-v2app.schema.json
+https://schema.zimaos.com/schema/zimaapp/v2/x-casaos.schema.json
 ```
 
 建议绑定专用域名，例如 `schemas.zimaos.com`，并将编辑器中的 `$schema` 地址切换到该域名。Cloudflare Pages 会按 `.json` 扩展名设置 Content-Type，并读取 `dist/_headers` 允许跨域读取 Schema；compose-go 的版本化文件使用长期 immutable 缓存，ZimaApp Schema 使用短缓存并要求重新验证。
