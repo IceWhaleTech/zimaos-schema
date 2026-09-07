@@ -1,24 +1,28 @@
 {
-    "name": "@icewhale/zimaos-schema",
-    "version": "1.0.0",
-    "description": "Static JSON Schema hosting for ZimaOS",
-    "files": [
-        "schema"
-    ],
-    "scripts": {
-        "generate:zimaapp": "node scripts/generate-zimaapp.mjs",
-        "build": "node scripts/build.mjs",
-        "check": "node scripts/build.mjs --check",
-        "prepack": "node scripts/build.mjs --check --quiet"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "engines": {
-        "node": ">=20.19.0"
-    },
-    "license": "Apache-2.0",
-    "devDependencies": {
-        "oxfmt": "0.66.0"
-    }
+  "name": "@icewhale/zimaos-schema",
+  "version": "1.0.0",
+  "description": "Static JSON Schema hosting for ZimaOS",
+  "license": "Apache-2.0",
+  "files": [
+    "schema"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "generate:zimaapp": "node scripts/generate-zimaapp.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "vitest run",
+    "prepack": "node scripts/build.mjs --check --quiet"
+  },
+  "devDependencies": {
+    "@adobe/jsonschema2md": "^8.0.11",
+    "ajv": "8.17.1",
+    "oxfmt": "0.66.0",
+    "vitest": "3.2.4"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }

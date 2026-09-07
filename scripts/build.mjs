@@ -1,4 +1,5 @@
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 
@@ -40,6 +41,40 @@ const publicPaths = schemaFiles.map((file) =>
 
 await writeFile(path.join(outputDirectory, "index.html"), renderHome(publicPaths));
 await writeFile(path.join(outputDirectory, "404.html"), renderNotFound());
+const origin = (process.env.SCHEMA_SITE_ORIGIN ?? "https://schema.zimaos.com").replace(/\/$/, "");
+const documentationInput = path.join(outputDirectory, "docs", "schema");
+await mkdir(path.join(outputDirectory, "docs"), { recursive: true });
+await mkdir(documentationInput, { recursive: true });
+await cp(
+  path.join(sourceDirectory, "zimaapp", "v2", "x-casaos.schema.json"),
+  path.join(documentationInput, "x-casaos.schema.json"),
+);
+execFileSync(
+  process.execPath,
+  [
+    path.join(root, "node_modules", "@adobe", "jsonschema2md", "cli.js"),
+    "-d",
+    documentationInput,
+    "-o",
+    path.join(outputDirectory, "docs"),
+    "-x",
+    "-",
+    "-f",
+    "yaml",
+    "-p",
+    "x-zimaapp-status",
+    "-p",
+    "x-zimaapp-warning",
+    "-p",
+    "x-zimaapp-replacement",
+  ],
+  { stdio: quiet ? "ignore" : "inherit" },
+);
+await writeFile(path.join(outputDirectory, "llms.txt"), renderLlms(origin));
+await writeFile(
+  path.join(outputDirectory, "llms-full.txt"),
+  await readFile(path.join(outputDirectory, "docs", "x-casaos.md"), "utf8"),
+);
 await writeFile(
   path.join(outputDirectory, "_headers"),
   [
@@ -57,7 +92,7 @@ await writeFile(
   ].join("\n"),
 );
 
-console.log(`Built ${schemaFiles.length} JSON Schema files into dist/.`);
+console.log(`Built ${schemaFiles.length} JSON Schema files and Markdown documentation into dist/.`);
 
 async function collectJSON(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -94,6 +129,23 @@ function renderHome(paths) {
   </ul>
 </main>`,
   );
+}
+
+function renderLlms(origin) {
+  return `# ZimaOS Schemas
+
+> JSON Schemas and generated field documentation for ZimaOS application manifests.
+
+## Documentation
+
+- [x-casaos field documentation](${origin}/docs/README.md): Markdown reference generated from the published extension schema.
+
+## Schemas
+
+- [Repository manifest schema](${origin}/schema/zimaapp/v2/repository.schema.json): Validation profile for repository submissions.
+- [General v2App schema](${origin}/schema/zimaapp/v2/zimaapp-v2app.schema.json): Validation profile for general v2App Compose files.
+- [x-casaos extension schema](${origin}/schema/zimaapp/v2/x-casaos.schema.json): Field definitions for the top-level extension.
+`;
 }
 
 function renderNotFound() {
